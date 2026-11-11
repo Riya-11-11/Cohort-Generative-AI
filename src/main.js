@@ -1,6 +1,7 @@
 import { get } from "mongoose";
 import { getSettingsFile, saveApiKey, getApiKey } from "./utils/file.utils.js";
 import rl from "./utils/readline.js";
+import initGraph from "./graph/graph.js";
 
 async function main() {
   const settings = await getSettingsFile();
@@ -20,6 +21,8 @@ async function main() {
   }
 
   const apiKey = response.apiKey;
+
+  await initGraph();
 
   rl.close();
 }
