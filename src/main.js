@@ -1,7 +1,7 @@
 import { get } from "mongoose";
 import { getSettingsFile, saveApiKey, getApiKey } from "./utils/file.utils.js";
 import rl from "./utils/readline.js";
-import initGraph from "./graph/graph.js";
+import initGraph from "./ai/graph/graph.js";
 
 async function main() {
   const settings = await getSettingsFile();
@@ -9,6 +9,7 @@ async function main() {
   if (!settings.apiKey) {
     const apiKey = await rl.question("Please enter your API key: ");
     await saveApiKey(apiKey);
+    return main();
   }
 
   const response = await getApiKey();
