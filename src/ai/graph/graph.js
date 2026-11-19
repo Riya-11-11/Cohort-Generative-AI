@@ -1,5 +1,5 @@
 import { StateGraph, START, END } from "@langchain/langgraph";
-import { LLMNode } from "./node.js";
+import { LLMNode, ToolNode } from "./node.js";
 import { HumanMessage, SystemMessage } from "langchain";
 import rl from "../../utils/readline.js";
 import * as z from "zod"; //for defining the state
@@ -12,8 +12,23 @@ const stateFormate = z.object({
 // Create graph
 const graph = new StateGraph(stateFormate)
   .addNode("LLMNode", LLMNode)
+  .addNode("ToolNode", ToolNode)
   .addEdge(START, "LLMNode") //Connect between two nodes
-  .addEdge("LLMNode", END)
+  .addEdge("ToolNode", "LLMNode") //Connect between two nodes
+  .addConditionalEdges(
+    "LLMNode",
+    (state) => {
+      const lastMessage = state.messages[state.messages.length - 1];
+
+      if (lastMessage.tool_calls && lastMessage.tool_calls.length > 0) {
+        return "ToolNode";
+      }
+
+      return "__end__";
+    },
+
+    ["ToolNode", "__end__"],
+  )
   .compile();
 
 export default async function initGraph() {
